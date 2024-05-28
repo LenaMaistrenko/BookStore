@@ -31,3 +31,16 @@ class Sale:
 
     def __str__(self):
         return f"{self.book.title} sold by {self.employee.full_name} on {self.sale_date} for {self.actual_sale_price}"
+
+class EntityFactory:
+    @staticmethod
+    def create_employee(full_name, position, contact_phone, email):
+        return Employee(full_name, position, contact_phone, email)
+
+    @staticmethod
+    def create_book(title, publication_year, author, genre, cost_price, potential_sale_price):
+        return Book(title, publication_year, author, genre, cost_price, potential_sale_price)
+
+    @staticmethod
+    def create_sale(employee, book, sale_date, actual_sale_price):
+        return Sale(employee, book, sale_date, actual_sale_price)
