@@ -2,7 +2,7 @@ import pickle
 from datetime import date, datetime
 
 
-# Класи сутностей
+
 class Employee:
     def __init__(self, full_name, position, contact_phone, email):
         self.full_name = full_name
@@ -38,7 +38,7 @@ class Sale:
         return f"{self.employee.full_name}, {self.book.title}, {self.sale_date}, {self.actual_sale_price}"
 
 
-# Фабричний метод
+# Фабрика
 class EntityFactory:
     @staticmethod
     def create_employee(full_name, position, contact_phone, email):
@@ -53,7 +53,7 @@ class EntityFactory:
         return Sale(employee, book, sale_date, actual_sale_price)
 
 
-# Спостерігач
+# Наблюдатель
 class Observable:
     def __init__(self):
         self._observers = []
@@ -69,7 +69,7 @@ class Observable:
             observer.update()
 
 
-# Менеджери
+
 class EmployeeManager(Observable):
     def __init__(self):
         super().__init__()
@@ -109,7 +109,7 @@ class SaleManager(Observable):
         self.notify()
 
 
-# Стратегія
+# Звіти
 class ReportStrategy:
     def generate_report(self, data):
         pass
