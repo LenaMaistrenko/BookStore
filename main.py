@@ -177,6 +177,76 @@ class Bookstore:
             Bookstore._instance = pickle.load(f)
         return Bookstore._instance
 
+    # Нові методи
+    def get_book_report(self):
+        self.set_report_strategy(BookReportStrategy())
+        return self.generate_report()
+
+    def get_sale_report(self):
+        self.set_report_strategy(SaleReportStrategy())
+        return self.generate_report()
+
+    def get_sales_by_date(self, sale_date):
+        sales = [sale for sale in self.sale_manager.sales if sale.sale_date == sale_date]
+        return SaleReportStrategy().generate_report(sales)
+
+    def get_sales_by_period(self, start_date, end_date):
+        sales = [sale for sale in self.sale_manager.sales if start_date <= sale.sale_date <= end_date]
+        return SaleReportStrategy().generate_report(sales)
+
+    def get_sales_by_employee(self, employee_name):
+        sales = [sale for sale in self.sale_manager.sales if sale.employee.full_name == employee_name]
+        return SaleReportStrategy().generate_report(sales)
+
+    def get_bestseller_book(self, start_date, end_date):
+        sales = [sale for sale in self.sale_manager.sales if start_date <= sale.sale_date <= end_date]
+        book_sales = {}
+        for sale in sales:
+            if sale.book.title in book_sales:
+                book_sales[sale.book.title] += 1
+            else:
+                book_sales[sale.book.title] = 1
+        bestseller = max(book_sales, key=book_sales.get)
+        return f"Bestseller Book: {bestseller}"
+
+    def get_top_employee(self, start_date, end_date):
+        sales = [sale for sale in self.sale_manager.sales if start_date <= sale.sale_date <= end_date]
+        employee_sales = {}
+        for sale in sales:
+            if sale.employee.full_name in employee_sales:
+                employee_sales[sale.employee.full_name] += sale.actual_sale_price
+            else:
+                employee_sales[sale.employee.full_name] = sale.actual_sale_price
+        top_employee = max(employee_sales, key=employee_sales.get)
+        return f"Top Employee: {top_employee}"
+
+    def get_total_profit(self, start_date, end_date):
+        sales = [sale for sale in self.sale_manager.sales if start_date <= sale.sale_date <= end_date]
+        total_profit = sum(sale.actual_sale_price - sale.book.cost_price for sale in sales)
+        return f"Total Profit: {total_profit}"
+
+    def get_popular_author(self, start_date, end_date):
+        sales = [sale for sale in self.sale_manager.sales if start_date <= sale.sale_date <= end_date]
+        author_sales = {}
+        for sale in sales:
+            if sale.book.author in author_sales:
+                author_sales[sale.book.author] += 1
+            else:
+                author_sales[sale.book.author] = 1
+        popular_author = max(author_sales, key=author_sales.get)
+        return f"Popular Author: {popular_author}"
+
+    def get_popular_genre(self, start_date, end_date):
+        sales = [sale for sale in self.sale_manager.sales if start_date <= sale.sale_date <= end_date]
+        genre_sales = {}
+        for sale in sales:
+            if sale.book.genre in genre_sales:
+                genre_sales[sale.book.genre] += 1
+            else:
+                genre_sales[sale.book.genre] = 1
+        popular_genre = max(genre_sales, key=genre_sales.get)
+        return f"Popular Genre: {popular_genre}"
+
 
 # Меню
 def main_menu():
@@ -229,41 +299,91 @@ def main_menu():
         elif choice == '5':
             emp_name = input("Enter employee name: ")
             employee = next((e for e in bookstore.employee_manager.employees if e.full_name == emp_name), None)
-            if not employee:
+            if employee:
+                book_title = input("Enter book title: ")
+                book = next((b for b in bookstore.book_manager.books if b.title == book_title), None)
+                if book:
+                    sale_date = input("Enter sale date (YYYY-MM-DD): ")
+                    sale_date = datetime.strptime(sale_date, "%Y-%m-%d").date()
+                    actual_sale_price = float(input("Enter actual sale price: "))
+                    bookstore.sale_manager.make_sale(employee, book, sale_date, actual_sale_price)
+                else:
+                    print("Book not found.")
+            else:
                 print("Employee not found.")
-                continue
-            book_title = input("Enter book title: ")
-            book = next((b for b in bookstore.book_manager.books if b.title == book_title), None)
-            if not book:
-                print("Book not found.")
-                continue
-            sale_date = datetime.strptime(input("Enter sale date (YYYY-MM-DD): "), "%Y-%m-%d").date()
-            actual_sale_price = float(input("Enter actual sale price: "))
-            bookstore.sale_manager.make_sale(employee, book, sale_date, actual_sale_price)
         elif choice == '6':
             print("\nGenerate Report")
-            print("1. Employee Report")
-            print("2. Book Report")
-            print("3. Sale Report")
-            sub_choice = input("Enter your choice: ")
-            if sub_choice == '1':
+            print("1. Full Information about Employees")
+            print("2. Full Information about Books")
+            print("3. Full Information about Sales")
+            print("4. Sales by Date")
+            print("5. Sales by Period")
+            print("6. Sales by Employee")
+            print("7. Bestseller Book by Period")
+            print("8. Top Employee by Period")
+            print("9. Total Profit by Period")
+            print("10. Popular Author by Period")
+            print("11. Popular Genre by Period")
+            report_choice = input("Enter your choice: ")
+
+            if report_choice == '1':
                 bookstore.set_report_strategy(EmployeeReportStrategy())
-            elif sub_choice == '2':
-                bookstore.set_report_strategy(BookReportStrategy())
-            elif sub_choice == '3':
-                bookstore.set_report_strategy(SaleReportStrategy())
+                print(bookstore.generate_report())
+            elif report_choice == '2':
+                print(bookstore.get_book_report())
+            elif report_choice == '3':
+                print(bookstore.get_sale_report())
+            elif report_choice == '4':
+                sale_date = input("Enter sale date (YYYY-MM-DD): ")
+                sale_date = datetime.strptime(sale_date, "%Y-%m-%d").date()
+                print(bookstore.get_sales_by_date(sale_date))
+            elif report_choice == '5':
+                start_date = input("Enter start date (YYYY-MM-DD): ")
+                start_date = datetime.strptime(start_date, "%Y-%m-%d").date()
+                end_date = input("Enter end date (YYYY-MM-DD): ")
+                end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
+                print(bookstore.get_sales_by_period(start_date, end_date))
+            elif report_choice == '6':
+                emp_name = input("Enter employee name: ")
+                print(bookstore.get_sales_by_employee(emp_name))
+            elif report_choice == '7':
+                start_date = input("Enter start date (YYYY-MM-DD): ")
+                start_date = datetime.strptime(start_date, "%Y-%m-%d").date()
+                end_date = input("Enter end date (YYYY-MM-DD): ")
+                end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
+                print(bookstore.get_bestseller_book(start_date, end_date))
+            elif report_choice == '8':
+                start_date = input("Enter start date (YYYY-MM-DD): ")
+                start_date = datetime.strptime(start_date, "%Y-%m-%d").date()
+                end_date = input("Enter end date (YYYY-MM-DD): ")
+                end_date = datetime.strptime(end_date, "%Y-%м-%d").date()
+                print(bookstore.get_top_employee(start_date, end_date))
+            elif report_choice == '9':
+                start_date = input("Enter start date (YYYY-MM-DD): ")
+                start_date = datetime.strptime(start_date, "%Y-%м-%d").date()
+                end_date = input("Enter end date (YYYY-MM-DD): ")
+                end_date = datetime.strptime(end_date, "%Y-%м-%d").date()
+                print(bookstore.get_total_profit(start_date, end_date))
+            elif report_choice == '10':
+                start_date = input("Enter start date (YYYY-MM-DD): ")
+                start_date = datetime.strptime(start_date, "%Y-%м-%d").date()
+                end_date = input("Enter end date (YYYY-MM-DD): ")
+                end_date = datetime.strptime(end_date, "%Y-%м-%d").date()
+                print(bookstore.get_popular_author(start_date, end_date))
+            elif report_choice == '11':
+                start_date = input("Enter start date (YYYY-MM-DD): ")
+                start_date = datetime.strptime(start_date, "%Y-%м-%d").date()
+                end_date = input("Enter end date (YYYY-MM-DD): ")
+                end_date = datetime.strptime(end_date, "%Y-%м-%d").date()
+                print(bookstore.get_popular_genre(start_date, end_date))
             else:
                 print("Invalid choice.")
-                continue
-            print(bookstore.generate_report())
         elif choice == '7':
-            filename = input("Enter filename to save: ")
+            filename = input("Enter filename to save data: ")
             bookstore.save_to_file(filename)
-            print(f"Data saved to {filename}")
         elif choice == '8':
-            filename = input("Enter filename to load: ")
+            filename = input("Enter filename to load data: ")
             bookstore = Bookstore.load_from_file(filename)
-            print(f"Data loaded from {filename}")
         elif choice == '9':
             break
         else:
