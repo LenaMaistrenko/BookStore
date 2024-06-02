@@ -5,13 +5,13 @@ from main import Bookstore, EmployeeManager, BookManager, SaleManager, EntityFac
 class TestBookstore(unittest.TestCase):
 
     def setUp(self):
-        # Ініціалізація тестової книгарні
+
         self.bookstore = Bookstore.get_instance()
         self.bookstore.employee_manager = EmployeeManager()
         self.bookstore.book_manager = BookManager()
         self.bookstore.sale_manager = SaleManager()
 
-        # Створення тестових даних
+
         self.employee = EntityFactory.create_employee("Don", "Sales", "111111111", "qwerty@asdf.com")
         self.book = EntityFactory.create_book("Math", 2021, "Pascal", "math", 10.0, 12.5)
         self.sale_date = date(2023, 5, 1)
